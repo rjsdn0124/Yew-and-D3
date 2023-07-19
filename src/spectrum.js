@@ -1,65 +1,30 @@
+// TODO:: Now we are calling d3 library at head.script in index.html.
+// Change it to call the library at here with 'import' declare.
+
 // import * as d3 from "../node_modules/d3/src/index"
 
-var data = [ {
-    letter: "A",
-    frequency: 0.08167
-  }, 
-  {
-    letter: "b",
-    frequency: 0.18167
-  },
-  {
-    letter: "c",
-    frequency: 0.28167
-  },
-  {
-    letter: "d",
-    frequency: 0.32167
-  },
-  {
-    letter: "e",
-    frequency: 0.22167
-  },
-  {
-    letter: "f",
-    frequency: 0.12167
-  },
-  {
-    letter: "g",
-    frequency: 0.04167
-  }
- ];
-//  export const chart = ()=> {
-//      console.log("hi")
-//      d3.select("body")          // 1
-//    .selectAll("p")          // 2
-//    .data(dataset)           // 3
-//    .enter()                 // 4
-//    .append("p")             // 5
-//    .text("hi jeongpro!");   // 6
-//  }
 export const chart = () => {
     // Declare the chart dimensions and margins.
-    const width = 928;
+    const width = 950;
     const height = 500;
     const marginTop = 30;
-    const marginRight = 0;
+    const marginRight = 20;
     const marginBottom = 30;
     const marginLeft = 40;
+    
     // Declare the x (horizontal position) scale.
-    const x = d3.scaleBand()
-        .domain(d3.groupSort(data, ([d]) => -d.frequency, (d) => d.letter)) // descending frequency
-        .range([marginLeft, width - marginRight])
-        .padding(0.1);
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(data, (d) => d.mz)]).nice() // just domain with mz array extracted from data array.
+        .range([marginLeft, width - marginRight]);
     
     // Declare the y (vertical position) scale.
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, (d) => d.frequency)])
+        .domain([0, d3.max(data, (d) => d.intensity)])
         .range([height - marginBottom, marginTop]);
   
     // Create the SVG container.
-    const svg = d3.
-        select("body")
+    const svg = d3
+        .select("body")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -68,29 +33,36 @@ export const chart = () => {
   
     // Add a rect for each bar.
     svg.append("g")
-        .attr("fill", "steelblue")
-      .selectAll()
-      .data(data)
-      .join("rect")
-        .attr("x", (d) => x(d.letter))
-        .attr("y", (d) => y(d.frequency))
-        .attr("height", (d) => y(0) - y(d.frequency))
-        .attr("width", x.bandwidth());
+        .attr("fill", "black")
+        .selectAll()
+        .data(data)
+        .join("rect")
+        .attr("x", (d) => x(d.mz))
+        .attr("y", (d) => y(d.intensity))
+        .attr("height", (d) => y(0) - y(d.intensity))
+        .attr("width", 1);
   
     // Add the x-axis and label.
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0));
+        .call(d3.axisBottom(x).ticks(width/50)); // Make ticks per 50 mz increased.
   
-    // Add the y-axis and label, and remove the domain line.
+    // Add the y-axis and label
     svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
-        .call(d3.axisLeft(y).tickFormat((y) => (y * 100).toFixed()))
-        .call(g => g.select(".domain").remove())
+        .call(d3.axisLeft(y).tickFormat(d3.format(".1e")))
         .call(g => g.append("text")
             .attr("x", -marginLeft)
             .attr("y", 10)
             .attr("fill", "currentColor")
             .attr("text-anchor", "start")
-            .text("↑ Frequency (%)"));
+            .text("↑ Intensity"));
   }
+  
+  var data = [
+      {"id":1,"mz":197.0175206309182,"intensity":100},
+      {"id":2,"mz":297.0188950281747,"intensity":2000},
+      {"id":3,"mz":397.0202694349709,"intensity":300},
+      {"id":4,"mz":497.02164385130686,"intensity":400},
+      {"id":5,"mz":504.11878753148153,"intensity":500},
+  ];

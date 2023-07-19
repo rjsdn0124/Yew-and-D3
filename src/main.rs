@@ -11,19 +11,15 @@ fn app() -> Html {
         #[wasm_bindgen(js_namespace = console)]
         fn log(s: &str);
     }
-    
-    // using the imported functions!
-    html! {
-        <div>
-        </div>
+    #[wasm_bindgen(module = "/src/spectrum.js")]
+    extern "C" {
+        fn chart();
     }
-}
-#[wasm_bindgen(module = "/src/spectrum.js")]
-extern "C" {
-    pub fn chart();
+    chart();
+    html! {
+    }
 }
 
 fn main() {
     yew::Renderer::<App>::new().render();
-    chart();
 }
